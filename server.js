@@ -1,0 +1,121 @@
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+
+const app = express();
+
+// Port for Express API
+const PORT = 5000;
+
+// Spring Boot service location
+const TASK_SERVICE_URL = "http://localhost:8080";
+
+app.use(cors());
+app.use(express.json());
+
+// ------------------------ ROUTES ------------------------
+
+// GET /tasks → fetch tasks from Spring Boot
+app.get("/tasks", async (req, res) => {
+  try {
+    const response = await axios.get(`${TASK_SERVICE_URL}/internal/tasks`);
+
+    res.status(200).json({
+      tasks: response.data
+    });
+
+  } catch (err) {
+    console.error("Error fetching tasks:", err.message);
+
+    res.status(500).json({
+      error: "Server error fetching tasks"
+    });
+  }
+});
+
+// POST /tasks → create task via Spring Boot
+app.post("/tasks", async (req, res) => {
+
+  const { title, description, status, dueDate } = req.body;
+
+  if (!title || !status || !dueDate) {
+    return res.status(400).json({
+      error: "Missing required fields"
+    });
+  }
+
+  try {
+
+    const response = await axios.post(`${TASK_SERVICE_URL}/internal/tasks`, {
+      title,
+      description,
+      status,
+      dueDate
+    });
+
+    res.status(201).json({
+      message: "Task created successfully",
+      task: response.data
+    });
+
+  } catch (err) {
+
+    console.error("Error saving task:", err.message);
+
+    res.status(500).json({
+      error: "Server error saving task"
+    });
+  }
+});
+
+//  DELETE /tasks delete task via Spring Boot
+
+app.delete("/tasks/:id", async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+
+    const response = await axios.delete(
+      `${TASK_SERVICE_URL}/internal/tasks/${id}`
+    );
+
+    res.status(200).json({
+      message: "Task deleted successfully",
+      task: response.data
+    });
+
+  } catch (err) {
+
+    // If Spring Boot returns 404
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({
+        error: `Task with id ${id} not found`
+      });
+    }
+
+    console.error("Error deleting task:", err.message);
+
+    res.status(500).json({
+      error: "Server error deleting task"
+    });
+
+  }
+
+});
+
+// Optional health check
+app.get("/health", (req, res) => {
+  res.json({
+    status: "running",
+    gateway: "express",
+    taskService: TASK_SERVICE_URL
+  });
+});
+
+// ------------------------ START SERVER ------------------------
+
+app.listen(PORT, () => {
+  console.log(`🚀 Express API running on http://localhost:${PORT}`);
+  console.log(`➡️  Forwarding requests to Spring Boot at ${TASK_SERVICE_URL}`);
+});
