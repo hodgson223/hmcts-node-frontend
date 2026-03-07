@@ -10,7 +10,6 @@ It connects to a postgresql database and provides API endpoints for creating and
 - List all tasks (`GET /tasks`) for testing or verification  
 - Input validation and error handling  
 - Stores data in postgresql database
-- bcrpyt used for hashing passwords before storing them in mongodb
 
 - Node.js (v18+)  
 - npm  
