@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
+
 
 const app = express();
 
@@ -13,7 +16,54 @@ const TASK_SERVICE_URL = "http://localhost:8080";
 app.use(cors());
 app.use(express.json());
 
+/**
+ * Swagger config
+ */
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Task Gateway API",
+      version: "1.0.0",
+      description: "Express gateway API for forwarding task requests to Spring Boot"
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`
+      }
+    ]
+  },
+  apis: [__filename]
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
 // ------------------------ ROUTES ------------------------
+
+/**
+ * @swagger
+ * /tasks:
+ *   get:
+ *     summary: Get all tasks
+ *     description: Fetches tasks from the Spring Boot service.
+ *     responses:
+ *       200:
+ *         description: Tasks fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tasks:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Server error fetching tasks
+ */
 
 // GET /tasks → fetch tasks from Spring Boot
 app.get("/tasks", async (req, res) => {
