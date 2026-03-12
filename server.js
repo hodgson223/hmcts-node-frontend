@@ -83,6 +83,45 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks:
+ *   post:
+ *     summary: Create a new task
+ *     description: Sends a new task to the Spring Boot service.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - status
+ *               - dueDate
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Finish assignment
+ *               description:
+ *                 type: string
+ *                 example: Complete the API gateway work
+ *               status:
+ *                 type: string
+ *                 example: PENDING
+ *               dueDate:
+ *                 type: string
+ *                 format: date
+ *                 example: 2026-03-20
+ *     responses:
+ *       201:
+ *         description: Task created successfully
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error saving task
+ */
+
 // POST /tasks → create task via Spring Boot
 app.post("/tasks", async (req, res) => {
 
@@ -117,6 +156,29 @@ app.post("/tasks", async (req, res) => {
     });
   }
 });
+
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Delete a task
+ *     description: Deletes a task from the Spring Boot service.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the task to delete
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       404:
+ *         description: Task not found
+ *       500:
+ *         description: Server error deleting task
+ */
 
 //  DELETE /tasks delete task via Spring Boot
 
@@ -153,6 +215,17 @@ app.delete("/tasks/:id", async (req, res) => {
   }
 
 });
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: API health check
+ *     description: Returns the status of the Express gateway and the Spring Boot service.
+ *     responses:
+ *       200:
+ *         description: API is running
+ */
 
 // Optional health check
 app.get("/health", (req, res) => {
